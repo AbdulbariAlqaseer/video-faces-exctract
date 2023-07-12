@@ -69,7 +69,7 @@ def visualize(
 
   for (start_point, end_point, _, _, result_text, text_location, keypoints_px) in\
     detection_info(detection_result, width, height):
-    
+    print(f"{start_point = }, {end_point = }", end="\t")
     # Draw bounding_box
     cv2.rectangle(annotated_image, start_point, end_point, TEXT_COLOR, 3)
     

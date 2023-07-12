@@ -17,6 +17,7 @@ detector = vision.FaceDetector.create_from_options(options)
 
 
 def mediapipe_detection(frame):
+    print("mediapipe module : ", end="\t")
     # Convert the frame received from OpenCV to a MediaPipe’s Image object.
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
     
@@ -27,16 +28,19 @@ def mediapipe_detection(frame):
     # Process the detection result. In this case, visualize it.
     image_copy = np.copy(mp_image.numpy_view())
     annotated_image = visualize(image_copy, face_detector_result)
-    
+    print("\n")
     return annotated_image
 
 def facerecognition_detection(frame):
+    print("face-reconition : ", end="\t")
     # Convert the frame received from OpenCV and detect
     face_locations = fr.face_locations(frame[:,:,::-1])
     tmp = frame.copy()
     # Process the detection result. In this case, visualize it.
     for t, r, b, l in face_locations:
-        tmp = cv2.rectangle(tmp, (t, l), (r, b), (255, 0, 0), 1)
+        print(f"top = {t}, right = {r}, bottom = {b}, left = {l}", end="\t")
+        cv2.rectangle(tmp, (l, t), (r, b), (255, 0, 0), 1)
+    print("\n")
     return tmp
 
 
@@ -62,6 +66,12 @@ while(True):
 
     # to take frame in second
     if num_frame % (fps // 5) : continue
+
+    dsize = (
+        frame.shape[1] * 0.6,
+        frame.shape[0] * 0.6
+    )
+    frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
 
     annotated_image = mediapipe_detection(frame)
     cv2.imshow("media pipe", annotated_image)
