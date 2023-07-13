@@ -60,7 +60,7 @@ def Facereconination():
     # for i, (t, r, b, l) in enumerate(unknown_face_locations):
     #     cv2.imshow(f"unknown-face {i}", unknown[t:b, l:r])
 
-    print(f"shape encoding {unknown_face_encodings.shape}\n")
+    # print(f"shape encoding {unknown_face_encodings.shape}\n")
     
 
     tmp = unknown.copy()

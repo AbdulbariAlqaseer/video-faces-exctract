@@ -10,9 +10,10 @@ import numpy as np
 from time import sleep
 import face_recognition as fr
 import cv2
+from face import ExtractedFace, TrackedFace
 
 
-def detect_result(detection_result, frame):
+def get_info_result(detection_result, frame):
     faces_image = locations = prob = []
     for detection in detection_result.detections:
         bbox = detection.bounding_box   
@@ -28,6 +29,13 @@ def detect_result(detection_result, frame):
     return faces_image, locations, prob
 
 
+def detect_faces(id_frame, frame):
+    face_locations = fr.face_locations(frame)
+    print(face_locations)
+    return [ExtractedFace(id_frame, frame, face_location_set) for face_location_set in face_locations]
+
+
+
 
 # Create an FaceDetector object.
 VisionRunningMode = mp.tasks.vision.RunningMode
@@ -35,7 +43,7 @@ base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
 options = vision.FaceDetectorOptions(base_options=base_options, running_mode=VisionRunningMode.VIDEO)
 detector = vision.FaceDetector.create_from_options(options)
 
-data = all_faces = last_clip_faces = []
+all_faces, tracked_faces, current_faces = [], [], []
 
 # Use OpenCV’s VideoCapture to load the input video.
 vid = cv2.VideoCapture(VIDEO_PATH)
@@ -59,23 +67,24 @@ while(True):
     # to take frame in second
     if num_frame % fps : continue
 
-    # Convert the frame received from OpenCV to a MediaPipe’s Image object.
-    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
+    # resize
+    frame = cv2.resize(frame, (512, 512))
+    
+    # convert frame to RGB
+    frame = frame[:,:,::-1]
+    
+    # detect faces
+    current_faces = detect_faces(num_frame, frame)
 
-    # Detect faces in the input image.
-    # The face detector must be created with the video mode.
-    face_detector_result = detector.detect_for_video(mp_image, int(ms))
+    cv2.imshow("frame", frame[:,:,::-1])
+    for i, face in enumerate(current_faces):
+        cv2.imshow(f'face image {i}', face.last_face_image)
 
-    # crop all faces
-    current_faces_images, current_faces_locations, current_faces_prob = detect_result(face_detector_result, frame)
-    current_faces_encodings = fr.face_encodings(frame, current_faces_locations)
-
-    if last_clip_faces:
-        # Compare between all last faces and all current_faces
-        
-        
+    # if last_clip_faces:
+    #     # Compare between all last faces and all current_faces
+    #     pass
 
 
-        pass
-
+    if cv2.waitKey(1) == ord('q'):
+        break
 

@@ -22,13 +22,6 @@ class ExtractedFace:
         t, r, b, l = self.last_face_location
         return self.last_frame[l:r,t:b]
         
-    def match_by_encodings(self, known_faces_encodings:list, tolerance=0.6) -> list:
-        matches = fr.compare_faces(known_faces_encodings, self.last_face_encoding, tolerance=tolerance)
-        return matches
-    
-    def distance_by_encodings(self, known_faces_encodings:list) -> list:
-        res = fr.face_distance(known_faces_encodings, self.last_face_encoding)
-        return res
 
 class TrackedFace:
     
@@ -61,7 +54,13 @@ class TrackedFace:
         self.duration_existence += 1
         pass
 
-
+    def match_by_encodings(self, known_faces_encodings:list, tolerance=0.6) -> list:
+        matches = fr.compare_faces(known_faces_encodings, self.last_face_encoding, tolerance=tolerance)
+        return matches
+    
+    def distance_by_encodings(self, known_faces_encodings:list) -> list:
+        res = fr.face_distance(known_faces_encodings, self.last_face_encoding)
+        return res
     # def similarity(first_obj:"TrackedFace", second_obj:"TrackedFace"):
     #     return np.dot(first_obj.features_encoding, second_obj.features_encoding) / (
     #         np.linalg.norm(first_obj.features_encoding)*np.linalg.norm(second_obj.features_encoding)
