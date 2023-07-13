@@ -69,7 +69,7 @@ def visualize(
 
   for (start_point, end_point, _, _, result_text, text_location, keypoints_px) in\
     detection_info(detection_result, width, height):
-    print(f"{start_point = }, {end_point = }", end="\t")
+    # print(f"{start_point = }, {end_point = }", end="\t")
     # Draw bounding_box
     cv2.rectangle(annotated_image, start_point, end_point, TEXT_COLOR, 3)
     
@@ -88,3 +88,7 @@ def save_data(save_path, data, columns):
     # save data about every face in dataframe
     df = pd.DataFrame(data, columns=columns)
     df.to_csv(save_path, index=False)
+
+def index_to_time(index, fps):
+   return index / fps
+
