@@ -20,7 +20,7 @@ class ExtractedFace:
 
     def __cut_face(self):
         t, r, b, l = self.last_face_location
-        return self.last_frame[l:r,t:b]
+        return self.last_frame[t:b, l:r]
         
 
 class TrackedFace:
@@ -31,6 +31,8 @@ class TrackedFace:
         self.ID = TrackedFace.ID
 
         self.__dict__.update(vars(face))
+        
+        self.id_first_frame = self.id_last_frame
         
         self.best_face_image = self.last_face_image
         self.best_face_probability = self.last_face_probability
