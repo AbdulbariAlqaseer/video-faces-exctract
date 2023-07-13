@@ -30,6 +30,7 @@ class TrackedFace:
     def __init__(self, face:ExtractedFace):
         self.ID = TrackedFace.ID
 
+        assert isinstance(face, ExtractedFace)
         self.__dict__.update(vars(face))
         
         self.id_first_frame = self.id_last_frame
@@ -42,7 +43,7 @@ class TrackedFace:
     
     def update_info(self, face:ExtractedFace):
         """call when sucess track"""
-
+        assert isinstance(face, ExtractedFace)
         # self.last_frame = face.last_frame
         # self.last_face_location = face.last_face_location
         # self.last_face_image = face.last_face_image
