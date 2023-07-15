@@ -1,6 +1,3 @@
-"""
-    detect with mediapipe, comapre with face_reconation, work with opencv
-"""
 import os
 from utile import index_to_time, save_data, save_image, visualize, detection_info
 from config import SAVE_DF_PATH, MODEL_PATH, SAVE_IMAGE_PATH, VIDEO_PATH
@@ -13,7 +10,6 @@ from time import sleep
 import face_recognition as fr
 import cv2
 from face import ExtractedFace, TrackedFace
-import functools
 from os.path import join
 
 def get_info_result(detection_result, frame):
