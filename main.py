@@ -1,4 +1,4 @@
-from utile import save_data, visualize, detection_info
+from utile import index_to_time, save_data, visualize, detection_info
 from config import SAVE_DF_PATH, MODEL_PATH, SAVE_IMAGE_PATH, VIDEO_PATH
 from mediapipe.tasks.python import vision
 from mediapipe.tasks import python
@@ -19,7 +19,7 @@ data = []
 vid = cv2.VideoCapture(VIDEO_PATH)
 
 # Load the frame rate of the video
-fps = int(vid.get(cv2.CAP_PROP_FPS))
+fps = vid.get(cv2.CAP_PROP_FPS)
 print(f"{fps = }")
 
 # Loop through each frame in the video using VideoCapture.read()
@@ -36,8 +36,7 @@ while(True):
     ms = vid.get(cv2.CAP_PROP_POS_MSEC)
 
     # to take frame in second
-    if num_frame % fps : continue
-
+    if num_frame % int(fps) : continue
     # Convert the frame received from OpenCV to a MediaPipe’s Image object.
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
     
