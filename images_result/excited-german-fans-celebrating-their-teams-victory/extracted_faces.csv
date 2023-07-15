@@ -1,0 +1,7 @@
+start_index_frame,end_index_frame,duration_frames,unique_name,start_time,end_time
+100.0,100.0,1,ID0-fromFrame100.0_toFrame100.0,4.0,4.0
+100.0,125.0,2,ID1-fromFrame100.0_toFrame125.0,4.0,5.0
+125.0,150.0,2,ID3-fromFrame125.0_toFrame150.0,5.0,6.0
+150.0,150.0,1,ID4-fromFrame150.0_toFrame150.0,6.0,6.0
+125.0,175.0,3,ID2-fromFrame125.0_toFrame175.0,5.0,7.0
+175.0,175.0,1,ID5-fromFrame175.0_toFrame175.0,7.0,7.0
