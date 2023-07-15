@@ -38,7 +38,7 @@ def Facereconination():
     Ronaldo_face_encoding = fr.face_encodings(Ronaldo[:,:,::-1], Ronaldo_face_location)[0]
     # cv2.imshow("Ronaldo", Ronaldo)
     # t, r, b, l = Ronaldo_face_location[0]
-    # cv2.imshow("Ronaldo-face", Ronaldo[l:r,t:b])
+    # cv2.imshow("Ronaldo-face", Ronaldo[t:b, l:r])
 
     messi = cv2.imread("D:\\final-project\\face-reco\\images_test\\messi.jfif")
     messi = cv2.resize(messi, (512, 512))
@@ -46,7 +46,7 @@ def Facereconination():
     messi_face_encoding = fr.face_encodings(messi[:,:,::-1], messi_face_location)[0]
     # cv2.imshow("Messi", messi)
     # t, r, b, l = messi_face_location[0]
-    # cv2.imshow("Messi-face", messi[l:r,t:b])
+    # cv2.imshow("Messi-face", messi[t:b, l:r])
 
     known_faces_encodings = [Ronaldo_face_encoding, messi_face_encoding]
     known_faces_names = ['Ronaldo', 'Messi']
@@ -60,7 +60,7 @@ def Facereconination():
     # for i, (t, r, b, l) in enumerate(unknown_face_locations):
     #     cv2.imshow(f"unknown-face {i}", unknown[t:b, l:r])
 
-    # print(f"shape encoding {unknown_face_encodings.shape}\n")
+    print(f"encoding {unknown_face_encodings}\n")
     
 
     tmp = unknown.copy()
@@ -80,7 +80,7 @@ def Facereconination():
         cv2.putText(tmp, name, (l,t +10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
 
     cv2.imshow("after recongnition", tmp)
-    # cv2.imwrite("D:\\final-project\\face-reco\\images_test\\res2.png", tmp)
+    cv2.imwrite("D:\\final-project\\face-reco\\images_test\\res2.png", tmp)
     cv2.waitKey(0)
 
 def mediapipeWithFacereconination():
