@@ -1,3 +1,4 @@
+import os
 from os.path import join, basename, splitext
 
 MARGIN = 2  # pixels
@@ -7,7 +8,7 @@ FONT_THICKNESS = 1
 TEXT_COLOR = (255, 0, 0)  # red
 
 MODEL_PATH = 'D:\\python-project\\mediapipe\\detector.tflite'
-VIDEO_PATH = 'D:\\final-project\\video-test\\Swimming.mp4'
+VIDEO_PATH = 'D:\\final-project\\video-test\\excited-german-fans-celebrating-their-teams-victory.mp4'
 NAME_VIDEO = splitext(basename(VIDEO_PATH))[0]  # exrtact name of video without suffix  
 
 
