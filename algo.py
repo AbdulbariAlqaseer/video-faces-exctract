@@ -11,6 +11,8 @@ import face_recognition as fr
 import cv2
 from face import ExtractedFace, TrackedFace
 from os.path import join
+from detector_model import Detector, FaceReconationDetecor, MediaPipeDetector
+from typing import Union
 
 def get_info_result(detection_result, frame):
     faces_image = locations = prob = []
@@ -37,6 +39,7 @@ def save_all_faces(all_faces:list[TrackedFace], fps):
     if not os.path.exists(SAVE_IMAGE_PATH):
         os.mkdir(SAVE_IMAGE_PATH)
     # data as csv
+    print(f"length data: {len(all_faces)}")
     data = [face_set.to_csv() for face_set in all_faces]
     df = pd.DataFrame(data, columns=data[0].keys())
     
@@ -73,13 +76,15 @@ vid = cv2.VideoCapture(VIDEO_PATH)
 fps = vid.get(cv2.CAP_PROP_FPS)
 print(f"{fps = }")
 
-while(True):
+detector = FaceReconationDetecor()
+
+while(vid.isOpened()):
       
     # Capture the video frame
     frame_exists, frame = vid.read()
     
     # if frame is read correctly ret is True
-    if not frame_exists: break
+    # if not frame_exists: break
 
     # get fram position and frame millesecond time
     num_frame = vid.get(cv2.CAP_PROP_POS_FRAMES)
@@ -94,7 +99,7 @@ while(True):
     frame = frame[:,:,::-1]
 
     # detect faces
-    current_faces = detect_faces(num_frame, frame)
+    current_faces = detector.detect_faces(num_frame, frame)
 
     # cv2.imshow("frame", frame[:,:,::-1])
     # for i, face in enumerate(current_faces):
@@ -137,3 +142,72 @@ while(True):
 vid.release()
 cv2.destroyAllWindows()
 save_all_faces(all_faces, fps)
+
+
+class FaceDetectionTimeTracker:
+    def __init__(self, video_path, model: Union[Detector, str], n_sec: int = 1, resize_to:tuple[int, int] = None):
+        if (not isinstance(model, Detector)) or (not model in ["face-reconation", "mediapipe"]): 
+            raise Exception('model must be "face-reconation" or "mediapipe", or object from "Detector"')
+        
+        self.vid = cv2.VideoCapture(video_path)
+        self.fps = self.vid.get(cv2.CAP_PROP_FPS)
+
+        if model == "face-reconation":
+            self.detector = FaceReconationDetecor()
+        elif model == "mediapipe":
+            self.detector = MediaPipeDetector()
+        else:
+            self.detector = model
+
+        self.all_faces, self.tracked_faces, self.current_faces = [], [], []
+        self.n_sec = n_sec
+        self.dsize = resize_to
+    
+    def run(self):
+        while(True):
+            # Capture the video frame
+            frame_exists, frame = vid.read()
+            
+            # if frame is read correctly ret is True
+            if not frame_exists: break
+
+            # get fram position and frame millesecond time
+            num_frame = vid.get(cv2.CAP_PROP_POS_FRAMES)
+
+            # to take frame in second
+            if num_frame % int(self.n_sec * fps) : continue
+            
+            # resize
+            if self.dsize: frame = cv2.resize(frame, self.dsize)
+
+            # detect faces
+            current_faces = self.detector.detect_faces(num_frame, frame)
+
+            Faces_keep_appearing = []
+            if self.tracked_faces:
+                current_faces_encodings = [face.last_face_encoding for face in self.current_faces]
+
+                # Compare between all last faces and all current_faces
+                for index, tracked_face_set in enumerate(self.tracked_faces):
+                    tracked_face_set:TrackedFace
+
+                    if len(current_faces_encodings) == 0: 
+                        all_faces.append(tracked_face_set)
+                        continue
+
+                    matches = tracked_face_set.match_by_encodings(current_faces_encodings)
+                    face_distances = tracked_face_set.distance_by_encodings(current_faces_encodings)
+
+                    best_match_index = np.argmin(face_distances)
+
+                    if matches[best_match_index]:
+                        tracked_face_set.update_info(self.current_faces[best_match_index])
+                        current_faces.pop(best_match_index)
+                        current_faces_encodings.pop(best_match_index)
+                        Faces_keep_appearing.append(tracked_face_set)
+                    else:
+                        self.all_faces.append(tracked_face_set)
+            
+            self.tracked_faces = Faces_keep_appearing
+            for face in self.current_faces:
+                self.tracked_faces.append(TrackedFace(face))
