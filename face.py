@@ -38,6 +38,7 @@ class TrackedFace:
         
         self.best_face_image = self.last_face_image
         self.best_face_probability = self.last_face_probability
+        self.best_face_encoding = self.last_face_encoding
 
         self.duration_existence = 1
         TrackedFace.ID += 1
@@ -50,6 +51,7 @@ class TrackedFace:
         if self.best_face_probability and self.best_face_probability <= self.last_face_probability:
             self.best_face_image = self.last_face_image
             self.best_face_probability = self.last_face_probability
+            self.best_face_encoding = self.last_face_encoding
         
         self.duration_existence += 1
         pass
