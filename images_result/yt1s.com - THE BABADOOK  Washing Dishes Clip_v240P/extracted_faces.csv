@@ -1,0 +1,12 @@
+start_index_frame,end_index_frame,duration_frames,unique_name,start_time,end_time
+300.0,350.0,3,ID0-fromFrame300.0_toFrame350.0,12.0,14.0
+450.0,475.0,2,ID1-fromFrame450.0_toFrame475.0,18.0,19.0
+575.0,600.0,2,ID2-fromFrame575.0_toFrame600.0,23.0,24.0
+700.0,700.0,1,ID3-fromFrame700.0_toFrame700.0,28.0,28.0
+725.0,750.0,2,ID4-fromFrame725.0_toFrame750.0,29.0,30.0
+775.0,800.0,2,ID5-fromFrame775.0_toFrame800.0,31.0,32.0
+900.0,975.0,4,ID6-fromFrame900.0_toFrame975.0,36.0,39.0
+1025.0,1025.0,1,ID7-fromFrame1025.0_toFrame1025.0,41.0,41.0
+1050.0,1050.0,1,ID8-fromFrame1050.0_toFrame1050.0,42.0,42.0
+1125.0,1125.0,1,ID9-fromFrame1125.0_toFrame1125.0,45.0,45.0
+1225.0,1250.0,2,ID10-fromFrame1225.0_toFrame1250.0,49.0,50.0

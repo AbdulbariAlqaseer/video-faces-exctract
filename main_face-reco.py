@@ -1,5 +1,5 @@
 from utile import save_data, visualize, detection_info
-from config import SAVE_DF_PATH, MODEL_PATH, SAVE_IMAGE_PATH, VIDEO_PATH
+from config import SAVE_DF_PATH, MODEL_MEDIAPIPE_PATH, SAVE_IMAGE_PATH, VIDEO_PATH
 from mediapipe.tasks.python import vision
 from mediapipe.tasks import python
 import mediapipe as mp
@@ -27,7 +27,7 @@ def detect_result(detection_result, frame, extention=0):
 
 # Create an FaceDetector object.
 VisionRunningMode = mp.tasks.vision.RunningMode
-base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
+base_options = python.BaseOptions(model_asset_path=MODEL_MEDIAPIPE_PATH)
 options = vision.FaceDetectorOptions(base_options=base_options, running_mode=VisionRunningMode.IMAGE)
 detector = vision.FaceDetector.create_from_options(options)
 

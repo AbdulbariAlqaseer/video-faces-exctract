@@ -7,8 +7,8 @@ FONT_SIZE = 1
 FONT_THICKNESS = 1
 TEXT_COLOR = (255, 0, 0)  # red
 
-MODEL_PATH = 'D:\\python-project\\mediapipe\\detector.tflite'
-VIDEO_PATH = 'D:\\final-project\\video-test\\excited-german-fans-celebrating-their-teams-victory.mp4'
+MODEL_MEDIAPIPE_PATH = 'D:\\python-project\\mediapipe\\detector.tflite'
+VIDEO_PATH = 'D:\\final-project\\video-test\\vlc-record-2023-06-30-16h20m30s-Dark S01E01.mp4-.mp4'
 NAME_VIDEO = splitext(basename(VIDEO_PATH))[0]  # exrtact name of video without suffix  
 
 
