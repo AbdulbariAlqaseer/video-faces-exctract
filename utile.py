@@ -15,6 +15,7 @@ def detection_info(detection_result, width=None, height=None) -> tuple:
     Returns:
         tuple.
     """
+    ls = []
     for detection in detection_result.detections:
         bbox = detection.bounding_box   
         start_point = bbox.origin_x, bbox.origin_y
@@ -31,9 +32,10 @@ def detection_info(detection_result, width=None, height=None) -> tuple:
 
         if width and height:
             keypoints_px = [_normalized_to_pixel_coordinates(keypoint.x, keypoint.y, width, height) for keypoint in detection.keypoints]
-            yield (start_point, end_point, category_name, probability, result_text, text_location, keypoints_px)
+            ls.append((start_point, end_point, category_name, probability, result_text, text_location, keypoints_px))
         else:
-            yield (start_point, end_point, category_name, probability, result_text, text_location)
+            ls.append((start_point, end_point, category_name, probability, result_text, text_location))
+    return ls
 
 def _normalized_to_pixel_coordinates(
     normalized_x: float, normalized_y: float, image_width: int,
