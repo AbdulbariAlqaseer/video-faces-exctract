@@ -41,7 +41,7 @@ class TrackedFace:
         self.best_face_probability = self.last_face_probability
         self.best_face_encoding = self.last_face_encoding
 
-        self.duration_existence = 1
+        self.duration_existence = 0
         TrackedFace.ID += 1
     
     def update_info(self, face:ExtractedFace):
@@ -68,14 +68,14 @@ class TrackedFace:
     def get_unique_name(self):
         return f"ID{self.face_ID}-fromFrame{self.id_first_frame}_toFrame{self.id_last_frame}"
 
-    def to_csv(self):
-        d = {
+    def to_dict(self):
+        return {
             "start_index_frame" : self.id_first_frame,
             "end_index_frame" : self.id_last_frame,
-            "duration_frames" : self.duration_existence,
-            "unique_name" : self.get_unique_name()
+            "duration_existance" : self.duration_existence,
+            "unique_name" : self.get_unique_name(),
+            "best_face_image" : self.best_face_image 
         }
-        return d
 
     
 class FaceTrack:

@@ -1,13 +1,9 @@
 import os
 from utile import index_to_time, save_data, save_image, visualize, detection_info
 from config import SAVE_DF_PATH, MODEL_MEDIAPIPE_PATH, SAVE_IMAGE_PATH, VIDEO_PATH
-# from mediapipe.tasks.python import vision
-# from mediapipe.tasks import python
-# import mediapipe as mp
 import numpy as np
 import pandas as pd
 from time import sleep
-import face_recognition
 import cv2
 import fastface as ff
 from face import ExtractedFace, TrackedFace , FaceTrack
@@ -22,7 +18,7 @@ class FaceDetectionTimeTracker:
         
         self.vid = cv2.VideoCapture(video_path)
         self.fps = self.vid.get(cv2.CAP_PROP_FPS)
-
+        print(f"{self.fps = }")
         if model == "face-reconation":
             self.detector = FaceReconationDetecor()
         elif model == "mediapipe":
@@ -32,12 +28,13 @@ class FaceDetectionTimeTracker:
             self.detector = FastFaceDetector()
         else:
             self.detector = model
-
+        
+        self.n_sec = n_sec
         self.window_size_frames = int(n_sec * self.fps)
         self.dsize = resize_to
         self.memorize_face_frames = int(memorize_face_sec * self.fps)
     
-    def run(self, save_image_path, save_df_path):
+    def run(self):
         self.all_faces, self.tracked_faces, self.current_faces = [], [], []
         while(True):
             # Capture the video frame
@@ -91,8 +88,9 @@ class FaceDetectionTimeTracker:
                 self.tracked_faces.append(TrackedFace(face))
         
         self.all_faces.extend(self.tracked_faces)
-        # if len(self.all_faces) > 0:
-        self.save_data(save_image_path, save_df_path)
+        if len(self.all_faces) > 0:
+            return self.get_result()
+        return None
     
 
     def run2(self , save_image_path , save_df_path , det_thre):
@@ -139,7 +137,8 @@ class FaceDetectionTimeTracker:
         
         self.all_faces.extend(self.tracked_faces)
         if len(self.all_faces) > 0:
-            self.save_data(save_image_path, save_df_path)
+            return self.get_result()
+        return None
 
 
 
@@ -195,27 +194,22 @@ class FaceDetectionTimeTracker:
         
         self.all_faces.extend(self.tracked_faces)
         if len(self.all_faces) > 0:
-            self.save_data(save_image_path, save_df_path)
-
-
-    def save_data(self, save_image_path, save_df_path):
-        if not os.path.exists(save_image_path):
-            os.mkdir(save_image_path)
+            return self.get_result()
+        return None
+        
+    def get_result(self):
         # data as csv
-        print(f"length data: {len(self.all_faces)}")
         data = [face_set.to_csv() for face_set in self.all_faces]
         df = pd.DataFrame(data, columns=data[0].keys())
         
         df["start_time"] =  df.start_index_frame.apply(index_to_time, fps=self.fps)
         df["end_time"] =  df.end_index_frame.apply(index_to_time, fps=self.fps)
+        df["duration_existance"] = df["duration_existance"].apply(lambda x:x*self.n_sec)
+        
+        # images = [face_set.best_face_image for face_set in self.all_faces]
+        # encodings = [face_set.best_face_encoding for face_set in self.all_faces]
 
-        df.to_csv(save_df_path, index=False)
-
-        # save best faces
-        image_paths = [join(save_image_path, face_set.get_unique_name() + ".jpg")  for face_set in self.all_faces] 
-        images = [face_set.last_face_image for face_set in self.all_faces]
-        for path, image in zip(image_paths, images):
-            save_image(image, path)
+        return df
 
 
 

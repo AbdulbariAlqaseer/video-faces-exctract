@@ -28,6 +28,32 @@ def mediapipe_detection(frame):
     # Process the detection result. In this case, visualize it.
     image_copy = np.copy(mp_image.numpy_view())
     annotated_image = visualize(image_copy, face_detector_result)
+
+    def __convert_results(detection_result):
+        # locations = []
+        # for detection in detection_result.detections:
+        #     bbox = detection.bounding_box   
+        #     top, left = bbox.origin_x, bbox.origin_y
+        #     bottom, right = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height
+
+        #     locations.append(
+        #         (top, right, bottom, left)
+        #     )
+        # return locations
+        return  [
+                    (
+                        detection.bounding_box.origin_y,
+                        detection.bounding_box.origin_x + detection.bounding_box.height,
+                        detection.bounding_box.origin_y + detection.bounding_box.width,
+                        detection.bounding_box.origin_x
+                    ) for detection in detection_result.detections
+                ]
+    
+    face_locations = __convert_results(face_detector_result)
+    if len(face_locations):
+        t, r, b, l = face_locations[0]
+        cv2.imshow("first face mediapipe", annotated_image[t:b, l:r])
+
     # print("\n")
     return annotated_image
 
@@ -41,6 +67,9 @@ def facerecognition_detection(frame):
         # print(f"top = {t}, right = {r}, bottom = {b}, left = {l}", end="\t")
         cv2.rectangle(tmp, (l, t), (r, b), (255, 0, 0), 1)
     # print("\n")
+    if len(face_locations):
+        t, r, b, l = face_locations[0]
+        cv2.imshow("first face face-recognition", tmp[t:b, l:r])
     return tmp
 
 
@@ -73,13 +102,14 @@ while(True):
     )
     frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
 
-    # annotated_image = mediapipe_detection(frame)
-    # cv2.imshow("media pipe", annotated_image)
+    annotated_image = mediapipe_detection(frame)
+    cv2.imshow("media pipe", annotated_image)
 
     annotated_image = facerecognition_detection(frame)
     cv2.imshow("facerecognition_detection", annotated_image)
     
-    # sleep(0.05)
+    
+    sleep(0.05)
     if cv2.waitKey(1) == ord('q'):
       break
 
