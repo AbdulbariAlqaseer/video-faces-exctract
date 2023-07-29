@@ -8,7 +8,7 @@ FONT_THICKNESS = 1
 TEXT_COLOR = (255, 0, 0)  # red
 
 MODEL_MEDIAPIPE_PATH = 'D:\\python-project\\mediapipe\\detector.tflite'
-VIDEO_PATH = '/home/sarpy/Desktop/41_s.mp4'
+VIDEO_PATH = '/home/sarpy/Desktop/walk.mp4'
 NAME_VIDEO = splitext(basename(VIDEO_PATH))[0]  # exrtact name of video without suffix
 
 SAVE_PATH = "/home/sarpy/Desktop/images_result"
