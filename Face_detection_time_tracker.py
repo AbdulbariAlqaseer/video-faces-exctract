@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from time import sleep
 import cv2
-import fastface as ff
+# import fastface as ff
 from face import ExtractedFace, TrackedFace , FaceTrack
 from os.path import join
 from detector_model import Detector, FaceReconationDetecor, MediaPipeDetector , FastFaceDetector
@@ -18,14 +18,13 @@ class FaceDetectionTimeTracker:
         
         self.vid = cv2.VideoCapture(video_path)
         self.fps = self.vid.get(cv2.CAP_PROP_FPS)
-        print(f"{self.fps = }")
         if model == "face-reconation":
             self.detector = FaceReconationDetecor()
         elif model == "mediapipe":
             self.detector = MediaPipeDetector(model_mediapipe_path)
         
-        elif model == "fast-face":
-            self.detector = FastFaceDetector()
+        # elif model == "fast-face":
+        #     self.detector = FastFaceDetector()
         else:
             self.detector = model
         
@@ -66,7 +65,7 @@ class FaceDetectionTimeTracker:
                 for tracked_face_set in self.tracked_faces:
                     tracked_face_set:TrackedFace
 
-                    if num_frame - tracked_face_set.id_last_frame - self.window_size_frames > self.memorize_face_frames:
+                    if num_frame - tracked_face_set.id_last_frame > self.memorize_face_frames:
                         self.all_faces.append(tracked_face_set)
                         continue
 
@@ -141,7 +140,6 @@ class FaceDetectionTimeTracker:
         return None
 
 
-
     def run3(self , save_image_path , save_df_path , det_thre):
         self.all_faces, self.tracked_faces, self.current_faces = [], [], []
         while(True):
@@ -199,7 +197,7 @@ class FaceDetectionTimeTracker:
         
     def get_result(self):
         # data as csv
-        data = [face_set.to_csv() for face_set in self.all_faces]
+        data = [face_set.to_dict() for face_set in self.all_faces]
         df = pd.DataFrame(data, columns=data[0].keys())
         
         df["start_time"] =  df.start_index_frame.apply(index_to_time, fps=self.fps)
@@ -213,5 +211,5 @@ class FaceDetectionTimeTracker:
 
 
 
-algo = FaceDetectionTimeTracker(VIDEO_PATH, model="fast-face", memorize_face_sec=15)
-algo.run2(SAVE_IMAGE_PATH, SAVE_DF_PATH , 0.80 )
+# algo = FaceDetectionTimeTracker(VIDEO_PATH, model="fast-face", memorize_face_sec=15)
+# algo.run2(SAVE_IMAGE_PATH, SAVE_DF_PATH , 0.80 )

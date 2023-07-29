@@ -3,7 +3,7 @@ from face import ExtractedFace
 import face_recognition
 from functools import partial
 import numpy as np
-import fastface as ff
+# import fastface as ff
 import cv2 as cv
 # from mediapipe.tasks.python import vision
 # from mediapipe.tasks import python
@@ -74,7 +74,7 @@ class FaceReconationDetecor(Detector):
         face_locations = self.__model_detect_locations(frame[:,:,::-1])
         return [ExtractedFace(id_frame, frame, face_location_set) for face_location_set in face_locations]
     
-
+'''
 class FastFaceDetector(Detector):
     def __init__(self) -> None:
         super().__init__() 
@@ -122,7 +122,7 @@ class FastFaceDetector(Detector):
             ) for detection in detection_result
 
         ]
-        
+'''     
          
 
 

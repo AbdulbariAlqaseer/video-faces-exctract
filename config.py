@@ -8,9 +8,9 @@ FONT_THICKNESS = 1
 TEXT_COLOR = (255, 0, 0)  # red
 
 MODEL_MEDIAPIPE_PATH = 'D:\\python-project\\mediapipe\\detector.tflite'
-VIDEO_PATH = '/home/sarpy/Desktop/41_s.mp4'
+VIDEO_PATH = 'D:\\final-project\\video-test\\vlc-record-2023-06-30-16h20m30s-Dark S01E01.mp4-.mp4'
 NAME_VIDEO = splitext(basename(VIDEO_PATH))[0]  # exrtact name of video without suffix
 
-SAVE_PATH = "/home/sarpy/Desktop/images_result"
+SAVE_PATH = "D:\\final-project\\face-reco\\images_result\\images_result"
 SAVE_IMAGE_PATH = join(SAVE_PATH, NAME_VIDEO)
 SAVE_DF_PATH = join(SAVE_PATH, NAME_VIDEO, "extracted_faces.csv")

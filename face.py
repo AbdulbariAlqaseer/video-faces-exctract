@@ -2,7 +2,7 @@ import numpy as np
 import face_recognition as fr
 import cv2 as cv
 from utile import index_to_time
-from deepface import DeepFace
+# from deepface import DeepFace
 
 class ExtractedFace:
     def __init__(self, id_frame, frame, face_location,face_box=None, prob=None):
