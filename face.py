@@ -94,7 +94,11 @@ class FaceTrack:
         ret = tracker.init(frame, self.face_box)
         self.tracker = tracker
         self.tracked_face_image = self.get_tracked_face()
-        self.duration_existence = 1
+
+        self.best_face_image = self.last_face_image
+        self.best_face_probability = self.last_face_probability
+        self.best_face_encoding = self.last_face_encoding
+        self.duration_existence = 0
         FaceTrack.ID += 1
 
     def update_info(self , id_frame , frame):
@@ -126,7 +130,26 @@ class FaceTrack:
                 return True
             else:
                 return False
-            
+
+    def add_to_track(self ,face:ExtractedFace):
+        assert isinstance(face, ExtractedFace)
+        self.__dict__.update(vars(face))
+
+        if self.best_face_probability and self.best_face_probability <= self.last_face_probability:
+            self.best_face_image = self.last_face_image
+            self.best_face_probability = self.last_face_probability
+            self.best_face_encoding = self.last_face_encoding
+        self.duration_existence += 1
+        pass
+
+
+    def match_by_encodings(self, known_faces_encodings:list, tolerance=0.6) -> list:
+        matches = fr.compare_faces(known_faces_encodings, self.last_face_encoding, tolerance=tolerance)
+        return matches
+    
+    def distance_by_encodings(self, known_faces_encodings:list) -> list:
+        res = fr.face_distance(known_faces_encodings, self.last_face_encoding)
+        return res       
 
     def get_unique_name(self):
         return f"ID{self.face_ID}-fromFrame{self.id_first_frame}_toFrame{self.id_last_frame}"

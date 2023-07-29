@@ -12,7 +12,7 @@ from detector_model import Detector, FaceReconationDetecor, MediaPipeDetector , 
 from typing import Union
 
 class FaceDetectionTimeTracker:
-    def __init__(self, video_path, model: Union[Detector, str] = "face-reconation", n_sec: int = 1, resize_to: tuple[int, int] = None, memorize_face_sec: int = 0, model_mediapipe_path = MODEL_MEDIAPIPE_PATH):
+    def __init__(self, video_path, model: Union[Detector, str] = "face-reconation", n_sec: int = 1, resize_to: tuple[int, int] = None, memorize_face_sec: int = 0, model_mediapipe_path = MODEL_MEDIAPIPE_PATH ):
         if (not isinstance(model, Detector)) and (not model in ["face-reconation", "mediapipe","fast-face"]): 
             raise Exception('model must be "face-reconation" or "mediapipe or fast-face", or object from "Detector"')
         
@@ -33,7 +33,7 @@ class FaceDetectionTimeTracker:
         self.dsize = resize_to
         self.memorize_face_frames = int(memorize_face_sec * self.fps)
     
-    def run(self):
+    def run(self , detect_thre = 0.80):
         self.all_faces, self.tracked_faces, self.current_faces = [], [], []
         while(True):
             # Capture the video frame
@@ -55,7 +55,7 @@ class FaceDetectionTimeTracker:
             # detect faces
             # face_locations = face_recognition.face_locations(frame[:,:,-1])
             # self.current_faces = [ExtractedFace(num_frame, frame, face_location_set) for face_location_set in face_locations]
-            self.current_faces = self.detector.detect_faces(num_frame, frame, ms=ms)
+            self.current_faces = self.detector.detect_faces(num_frame, frame, ms=ms , det_threshold = detect_thre)
             
             Faces_keep_appearing = []
             if self.tracked_faces:
@@ -92,7 +92,7 @@ class FaceDetectionTimeTracker:
         return None
     
 
-    def run2(self , save_image_path , save_df_path , det_thre):
+    def run2(self ,det_thre=0.80):
         self.all_faces, self.tracked_faces, self.current_faces = [], [], []
         while(True):
             # Capture the video frame
@@ -140,7 +140,7 @@ class FaceDetectionTimeTracker:
         return None
 
 
-    def run3(self , save_image_path , save_df_path , det_thre):
+    def run3(self ,det_thre=0.80):
         self.all_faces, self.tracked_faces, self.current_faces = [], [], []
         while(True):
             # Capture the video frame
@@ -163,46 +163,52 @@ class FaceDetectionTimeTracker:
             # keep tracked_faces
             self.all_faces.extend([track for track in self.tracked_faces if num_frame - track.id_last_frame - self.window_size_frames > self.memorize_face_frames])
             self.tracked_faces = [track for track in self.tracked_faces if num_frame - track.id_last_frame - self.window_size_frames <= self.memorize_face_frames]
-
             # to take frame in second
             if num_frame % self.window_size_frames : continue
 
             # detect faces
             self.current_faces = self.detector.detect_faces(num_frame, frame, det_threshold = det_thre)
-            tracked_faces_encodings = [track.best_face_encoding for track in self.tracked_faces]
+            current_faces_encodings = [face.last_face_encoding for face in self.current_faces]
+            # tracked_faces_encodings = [track.best_face_encoding for track in self.tracked_faces]
+            
             # Compare between all tracked faces and current_detected_faces
-            for face in self.current_faces:
-                if len(tracked_faces_encodings):
-                    matches = face.match_by_encodings(tracked_faces_encodings)
-                    if any(matches):
-                        face_distances = face.distance_by_encodings(tracked_faces_encodings)
-                        best_match_index = np.argmin(face_distances)
-                        if matches[best_match_index]:
-                            self.tracked_faces[best_match_index].id_last_frame = num_frame
-                            if face.last_face_probability > self.tracked_faces[best_match_index].last_face_probability:
-                                self.tracked_faces[best_match_index].face_box = face.face_box
-                                self.tracked_faces[best_match_index].last_face_location = face.last_face_location
-                                self.tracked_faces[best_match_index].last_face_image = face.last_face_image
-                                self.tracked_faces[best_match_index].last_face_probability = face.last_face_probability
+            for tracked_face_set in self.tracked_faces:
+                tracked_face_set:FaceTrack
 
-                            self.tracked_faces[best_match_index].duration_existence += 1
-                            break
-                    else:
-                        self.tracked_faces.append(FaceTrack(frame ,face))
+                if len(current_faces_encodings):
+                    matches = tracked_face_set.match_by_encodings(current_faces_encodings)
+                    face_distances = tracked_face_set.distance_by_encodings(current_faces_encodings)
+
+                    best_match_index = np.argmin(face_distances)
+
+                    if matches[best_match_index]:
+                        tracked_face_set.add_to_track(self.current_faces[best_match_index])
+                        self.current_faces.pop(best_match_index)
+                        current_faces_encodings.pop(best_match_index)
+
+            for face in self.current_faces:
+                self.tracked_faces.append(FaceTrack(frame ,face))
+
+
         
         self.all_faces.extend(self.tracked_faces)
-        if len(self.all_faces) > 0:
+        if len(self.all_faces) > 0: 
             return self.get_result()
         return None
         
     def get_result(self):
         # data as csv
-        data = [face_set.to_dict() for face_set in self.all_faces]
+
+        for face_set in self.all_faces:
+            cv2.imwrite(SAVE_IMAGE_PATH +'/'+ face_set.get_unique_name()+'.jpg', face_set.last_face_image)
+        data = [ face_set.to_dict() for face_set in self.all_faces]
+        data = [ result for result in data if (index_to_time(result['end_index_frame'], fps=self.fps) - index_to_time(result['start_index_frame'],fps=self.fps)) > 5  ]
+
         df = pd.DataFrame(data, columns=data[0].keys())
-        
-        df["start_time"] =  df.start_index_frame.apply(index_to_time, fps=self.fps)
-        df["end_time"] =  df.end_index_frame.apply(index_to_time, fps=self.fps)
-        df["duration_existance"] = df["duration_existance"].apply(lambda x:x*self.n_sec)
+        df["start_time"] = df.start_index_frame.apply(index_to_time, fps=self.fps)
+        df["end_time"] = df.end_index_frame.apply(index_to_time, fps=self.fps)
+
+        # df["duration_existance"] = df["duration_existance"].apply(lambda x:x*self.n_sec)
         
         # images = [face_set.best_face_image for face_set in self.all_faces]
         # encodings = [face_set.best_face_encoding for face_set in self.all_faces]
@@ -211,5 +217,6 @@ class FaceDetectionTimeTracker:
 
 
 
-# algo = FaceDetectionTimeTracker(VIDEO_PATH, model="fast-face", memorize_face_sec=15)
-# algo.run2(SAVE_IMAGE_PATH, SAVE_DF_PATH , 0.80 )
+algo = FaceDetectionTimeTracker(VIDEO_PATH, model="face-reconation", memorize_face_sec=15)
+df = algo.run()
+df.to_csv(SAVE_DF_PATH , index = False)
