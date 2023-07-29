@@ -208,7 +208,7 @@ class FaceDetectionTimeTracker:
         df["start_time"] = df.start_index_frame.apply(index_to_time, fps=self.fps)
         df["end_time"] = df.end_index_frame.apply(index_to_time, fps=self.fps)
 
-        # df["duration_existance"] = df["duration_existance"].apply(lambda x:x*self.n_sec)
+        df["duration_existance"] = df["duration_existance"].apply(lambda x:x*self.n_sec)
         
         # images = [face_set.best_face_image for face_set in self.all_faces]
         # encodings = [face_set.best_face_encoding for face_set in self.all_faces]
