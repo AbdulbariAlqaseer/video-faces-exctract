@@ -8,7 +8,7 @@ import cv2
 # import fastface as ff
 from face import ExtractedFace, TrackedFace , FaceTrack
 from os.path import join
-from detector_model import Detector, FaceReconationDetecor, MediaPipeDetector , FastFaceDetector
+from detector_model import Detector, FaceReconationDetecor, MediaPipeDetector
 from typing import Union
 
 class FaceDetectionTimeTracker:
@@ -217,6 +217,6 @@ class FaceDetectionTimeTracker:
 
 
 
-algo = FaceDetectionTimeTracker(VIDEO_PATH, model="face-reconation", memorize_face_sec=15)
-df = algo.run()
-df.to_csv(SAVE_DF_PATH , index = False)
+# algo = FaceDetectionTimeTracker(VIDEO_PATH, model="face-reconation", memorize_face_sec=15)
+# df = algo.run()
+# df.to_csv(SAVE_DF_PATH , index = False)
