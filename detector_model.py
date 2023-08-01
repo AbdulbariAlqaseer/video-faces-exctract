@@ -34,16 +34,6 @@ class MediaPipeDetector(Detector):
 
 
     def __convert_results(self, detection_result):
-        # locations = []
-        # for detection in detection_result.detections:
-        #     bbox = detection.bounding_box   
-        #     top, left = bbox.origin_x, bbox.origin_y
-        #     bottom, right = bbox.origin_x + bbox.width, bbox.origin_y + bbox.height
-
-        #     locations.append(
-        #         (top, right, bottom, left)
-        #     )
-        # return locations
         return  [
                     (
                         detection.bounding_box.origin_y,
