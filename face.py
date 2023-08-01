@@ -54,8 +54,7 @@ class TrackedFace:
             self.best_face_probability = self.last_face_probability
             self.best_face_encoding = self.last_face_encoding
         
-        self.duration_existence += 1
-        pass
+        self.duration_existence = self.id_last_frame - self.id_first_frame 
 
     def match_by_encodings(self, known_faces_encodings:list, tolerance=0.6) -> list:
         matches = fr.compare_faces(known_faces_encodings, self.last_face_encoding, tolerance=tolerance)
@@ -72,9 +71,9 @@ class TrackedFace:
         return {
             "start_index_frame" : self.id_first_frame,
             "end_index_frame" : self.id_last_frame,
-            "duration_existance" : self.duration_existence,
-            "unique_name" : self.get_unique_name(),
-            "best_face_image" : self.best_face_image 
+            "duration_existence" : self.duration_existence,
+            "encoding" : self.best_face_encoding,
+            "face_image" : self.best_face_image 
         }
 
     
