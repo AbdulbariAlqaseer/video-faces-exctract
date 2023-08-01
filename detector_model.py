@@ -1,5 +1,5 @@
 from abc import ABC
-from face import ExtractedFace
+from face import TrackedFace
 import face_recognition
 from functools import partial
 import numpy as np
@@ -8,12 +8,21 @@ import cv2 as cv
 from mediapipe.tasks.python import vision
 from mediapipe.tasks import python
 import mediapipe as mp
+from typing import Union
 
 class Detector(ABC):
     def __init__(self) -> None:
         pass
 
-    def detect_faces(self, id_frame:int, frame:np.ndarray, **kwargs) -> list[ExtractedFace]:
+    def detect_faces(self,  image:np.ndarray, id_:Union[int, None] = None, **kwargs) -> list[TrackedFace]:
+        """Detects faces in the image
+
+        Args:
+            image (np.ndarray): opencv image in mode BGR
+            id_ (int): id of frame if in video.
+        Returns:
+            list[TrackedFace]: Return a list of extracted faces that each expresses a face and its information
+        """
         pass
 
 class MediaPipeDetector(Detector):
@@ -26,11 +35,16 @@ class MediaPipeDetector(Detector):
         self.__detector = vision.FaceDetector.create_from_options(options)
         self.__mp_Image = partial(mp.Image, image_format = mp.ImageFormat.SRGB)
     
-    def detect_faces(self, id_frame:int, frame:np.ndarray, **kwargs) -> list[ExtractedFace]:
-        mp_frame = self.__mp_Image(data=frame)
-        face_detector_result = self.__detector.detect_for_video(mp_frame, int(kwargs['ms']))
+    def detect_faces(self, image:np.ndarray, id_:Union[int, None] = None, **kwargs) -> list[TrackedFace]:
+        mp_image = self.__mp_Image(data=image)
+        
+        if id_:
+            face_detector_result = self.__detector.detect_for_video(mp_image, int(kwargs['ms']))
+        else:
+            face_detector_result = self.__detector.detect(mp_image) 
+
         face_locations = self.__convert_results(face_detector_result)
-        return [ExtractedFace(id_frame, frame, face_location_set) for face_location_set in face_locations]
+        return [TrackedFace(image, face_location_set, id_frame=id_) for face_location_set in face_locations]
 
 
     def __convert_results(self, detection_result):
@@ -51,18 +65,9 @@ class FaceReconationDetecor(Detector):
         self.model_name = model
         # self.__model_detect_locations = partial(face_recognition.face_locations, number_of_times_to_upsample = number_of_timescurrent_faces_to_upsample, model = model)
 
-    def detect_faces(self, id_frame:int, frame:np.ndarray, **kwargs) -> list[ExtractedFace]:
-        """Detects faces in the frame
-
-        Args:
-            id_frame (int): id of frame, frame order number
-            frame (np.ndarray): opencv frame in mode BGR
-
-        Returns:
-            list[ExtractedFace]: Return a list of extracted faces that each expresses a face and its information
-        """
-        face_locations = face_recognition.face_locations(frame[:,:,-1], model=self.model_name)
-        current_faces = [ExtractedFace(id_frame, frame, face_location_set) for face_location_set in face_locations]
+    def detect_faces(self, image:np.ndarray, id_:Union[int, None] = None, **kwargs) -> list[TrackedFace]:
+        face_locations = face_recognition.face_locations(image[:,:,-1], model=self.model_name)
+        current_faces = [TrackedFace(image, face_location_set, id_frame=id_) for face_location_set in face_locations]
         return current_faces
     
 
@@ -73,17 +78,17 @@ class FastFaceDetector(Detector):
         detector.eval()
         self.__detector = detector
 
-    def detect_faces(self, id_frame: int, frame: np.ndarray, **kwargs) -> list[ExtractedFace]:
-        # frame = frame[:,:,::-1]
-        frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-        face_detector_result = self.__detector.predict(frame, det_threshold=kwargs['det_threshold'])
+    def detect_faces(self, image:np.ndarray, id_:Union[int, None] = None, **kwargs) -> list[TrackedFace]:
+        # image = image[:,:,::-1]
+        image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+        face_detector_result = self.__detector.predict(image, det_threshold=kwargs['det_threshold'])
         face_detector_result = face_detector_result[0]
         corrected_result = self.__check_results(face_detector_result)
         face_locations = self.__convert_results(corrected_result['boxes'])
         face_boxes = self.__create_face_box(corrected_result['boxes'])
         face_probabilities = corrected_result['scores']
-        frame = cv.cvtColor(frame, cv.COLOR_RGB2BGR)
-        return [ExtractedFace(id_frame, frame, face_location_set ,face_boxes_set , face_probabilities_set ) for face_location_set , face_probabilities_set , face_boxes_set in zip(face_locations , face_probabilities , face_boxes)]
+        image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+        return [TrackedFace(image, face_location_set, id_frame=id_ ,face_box=face_boxes_set , prob=face_probabilities_set ) for face_location_set , face_probabilities_set , face_boxes_set in zip(face_locations , face_probabilities , face_boxes)]
     
     def __convert_results(self , detection_result):
         return  [

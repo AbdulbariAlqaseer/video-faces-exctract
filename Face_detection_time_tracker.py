@@ -54,8 +54,8 @@ class FaceDetectionTimeTracker:
 
             # detect faces
             # face_locations = face_recognition.face_locations(frame[:,:,-1])
-            # self.current_faces = [ExtractedFace(num_frame, frame, face_location_set) for face_location_set in face_locations]
-            self.current_faces = self.detector.detect_faces(num_frame, frame, ms=ms , det_threshold = detect_thre)
+            # self.current_faces = [TrackedFace(num_frame, frame, face_location_set) for face_location_set in face_locations]
+            self.current_faces = self.detector.detect_faces(image=frame, id_=num_frame, ms=ms , det_threshold = detect_thre)
             
             Faces_keep_appearing = []
             if self.tracked_faces:
@@ -84,7 +84,7 @@ class FaceDetectionTimeTracker:
             
             self.tracked_faces = Faces_keep_appearing
             for face in self.current_faces:
-                self.tracked_faces.append(TrackedFace(face))
+                self.tracked_faces.append(face)
         
         self.all_faces.extend(self.tracked_faces)
         if len(self.all_faces) > 0:
@@ -167,7 +167,7 @@ class FaceDetectionTimeTracker:
             if num_frame % self.window_size_frames : continue
 
             # detect faces
-            self.current_faces = self.detector.detect_faces(num_frame, frame, det_threshold = det_thre)
+            self.current_faces = self.detector.detect_faces(frame, num_frame, det_threshold = det_thre)
             current_faces_encodings = [face.last_face_encoding for face in self.current_faces]
             # tracked_faces_encodings = [track.best_face_encoding for track in self.tracked_faces]
             
