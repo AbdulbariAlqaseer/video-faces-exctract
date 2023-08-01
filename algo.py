@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from time import sleep
 import cv2
-from face import TrackedFace , FaceTrack
+from face import TrackedFace
 from os.path import join
 from detector_model import Detector, FaceReconationDetecor, MediaPipeDetector, FastFaceDetector
 from typing import Union
@@ -29,7 +29,8 @@ class FaceDetectionTimeTracker:
             ):
         i_image = cv2.imread(image_path)
         i_image = cv2.cvtColor(i_image, cv2.COLOR_BGR2RGB)
-        faces = self.detector.detect_faces(frame=i_image, det_threshold = detect_threshold)
+        faces = self.detector.detect_faces(image=i_image, det_threshold = detect_threshold)
+        print(faces)
         res = self.__get_result_video(faces)
         return res
 
@@ -118,8 +119,14 @@ class FaceDetectionTimeTracker:
         return None
     
     def __get_result_video(self, all_faces:list[TrackedFace], fps=None, existance_threshold=None):
+        if existance_threshold:
+            return [
+                face_set.to_dict() 
+                for face_set in all_faces
+                if face_set.duration_existence / fps >= existance_threshold
+            ]
+
         return [
                 face_set.to_dict() 
                 for face_set in all_faces
-                if existance_threshold and face_set.duration_existence / fps >= existance_threshold
             ]

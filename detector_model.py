@@ -3,11 +3,11 @@ from face import TrackedFace
 import face_recognition
 from functools import partial
 import numpy as np
-import fastface as ff
+# import fastface as ff
 import cv2 as cv
-from mediapipe.tasks.python import vision
-from mediapipe.tasks import python
-import mediapipe as mp
+# from mediapipe.tasks.python import vision
+# from mediapipe.tasks import python
+# import mediapipe as mp
 from typing import Union
 
 class Detector(ABC):
