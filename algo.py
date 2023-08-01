@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from time import sleep
 import cv2
-from face import ExtractedFace, TrackedFace , FaceTrack
+from face import TrackedFace , FaceTrack
 from os.path import join
 from detector_model import Detector, FaceReconationDetecor, MediaPipeDetector, FastFaceDetector
 from typing import Union
@@ -23,6 +23,16 @@ class FaceDetectionTimeTracker:
         else:
             self.detector = model 
     
+
+    def from_image(
+                self, image_path, detect_threshold = 0.80
+            ):
+        i_image = cv2.imread(image_path)
+        i_image = cv2.cvtColor(i_image, cv2.COLOR_BGR2RGB)
+        faces = self.detector.detect_faces(frame=i_image, det_threshold = detect_threshold)
+        res = self.__get_result_video(faces)
+        return res
+
     def from_video(
                 self, video_path, resize_to: tuple[int, int] = None,
                 n_sec: int = 1, memorize_face_sec: int = 0, 
@@ -34,9 +44,6 @@ class FaceDetectionTimeTracker:
                 detect_threshold, existance_threshold
             )
         return res
-        
-
-
 
     def __extract_from_video_depend_by_classic_algo(
                 self, video_path, dsize, 
@@ -73,7 +80,7 @@ class FaceDetectionTimeTracker:
             # detect faces
             # face_locations = face_recognition.face_locations(frame[:,:,-1])
             # current_faces = [ExtractedFace(num_frame, frame, face_location_set) for face_location_set in face_locations]
-            current_faces = self.detector.detect_faces(num_frame, frame, ms=ms , det_threshold = detect_threshold)
+            current_faces = self.detector.detect_faces(image=frame, id_=num_frame, ms=ms , det_threshold=detect_threshold)
             
             Faces_keep_appearing = []
             if tracked_faces:
@@ -102,7 +109,7 @@ class FaceDetectionTimeTracker:
             
             tracked_faces = Faces_keep_appearing
             for face in current_faces:
-                tracked_faces.append(TrackedFace(face))
+                tracked_faces.append(face)
         
         all_faces.extend(tracked_faces)
         print(len(all_faces))
@@ -110,5 +117,9 @@ class FaceDetectionTimeTracker:
             return self.__get_result_video(all_faces, fps, existance_threshold)
         return None
     
-    def __get_result_video(self, all_faces:list[ExtractedFace], fps, existance_threshold):
-        return [face_set.to_dict() for face_set in all_faces]
+    def __get_result_video(self, all_faces:list[TrackedFace], fps=None, existance_threshold=None):
+        return [
+                face_set.to_dict() 
+                for face_set in all_faces
+                if existance_threshold and face_set.duration_existence / fps >= existance_threshold
+            ]
