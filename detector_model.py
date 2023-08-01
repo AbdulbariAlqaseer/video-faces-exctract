@@ -3,11 +3,11 @@ from face import ExtractedFace
 import face_recognition
 from functools import partial
 import numpy as np
-# import fastface as ff
+import fastface as ff
 import cv2 as cv
-# from mediapipe.tasks.python import vision
-# from mediapipe.tasks import python
-# import mediapipe as mp
+from mediapipe.tasks.python import vision
+from mediapipe.tasks import python
+import mediapipe as mp
 
 class Detector(ABC):
     def __init__(self) -> None:
@@ -20,11 +20,11 @@ class MediaPipeDetector(Detector):
     def __init__(self, model_path) -> None:
         super().__init__()
         # Create an FaceDetector object.
-        # VisionRunningMode = mp.tasks.vision.RunningMode
-        # base_options = python.BaseOptions(model_asset_path=model_path)
-        # options = vision.FaceDetectorOptions(base_options=base_options, running_mode=VisionRunningMode.VIDEO)
-        # self.__detector = vision.FaceDetector.create_from_options(options)
-        # self.__mp_Image = partial(mp.Image, image_format = mp.ImageFormat.SRGB)
+        VisionRunningMode = mp.tasks.vision.RunningMode
+        base_options = python.BaseOptions(model_asset_path=model_path)
+        options = vision.FaceDetectorOptions(base_options=base_options, running_mode=VisionRunningMode.VIDEO)
+        self.__detector = vision.FaceDetector.create_from_options(options)
+        self.__mp_Image = partial(mp.Image, image_format = mp.ImageFormat.SRGB)
     
     def detect_faces(self, id_frame:int, frame:np.ndarray, **kwargs) -> list[ExtractedFace]:
         mp_frame = self.__mp_Image(data=frame)
@@ -75,7 +75,7 @@ class FaceReconationDetecor(Detector):
         current_faces = [ExtractedFace(id_frame, frame, face_location_set) for face_location_set in face_locations]
         return current_faces
     
-'''
+
 class FastFaceDetector(Detector):
     def __init__(self) -> None:
         super().__init__() 
@@ -123,10 +123,3 @@ class FastFaceDetector(Detector):
             ) for detection in detection_result
 
         ]
-'''     
-         
-
-
-
-        
-
